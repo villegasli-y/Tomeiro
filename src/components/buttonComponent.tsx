@@ -1,17 +1,22 @@
 type Props = {
     title: string;
-    onClick: () => void;
+    onClick?: () => void;
     className?: string;
+    type?: "button" | "submit";
 }
 
 export default function ButtonComponent({
     title,
     onClick,
     className,
+    type = "button",
 }: Props) {
     return (
         <div>
-            <button onClick={onClick} className={`${className} bg-blue-500`}>
+            <button
+                type={type}
+                onClick={onClick}
+                className={`${className} bg-blue-500`}>
                 <div className="font-bold">
                     {title}
                 </div>
