@@ -9,27 +9,25 @@ function App() {
   const [password, setPassword] = useState("");
 
   return (
-    <>
-      <div>
-        <CardComponent>
-          <div className='flex flex-col gap-4'>
-            <InputComponent
-              value={userName}
-              placeholder={"Username"}
-              onChange={(e) => setUserName(e.target.value)}
-            />
-            <InputComponent
-              value={password}
-              placeholder={"Password"}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className='mt-[16px]'>
-            <ButtonComponent title="Login" onClick={() => { }} />
-          </div>
-        </CardComponent>
-      </div>
-    </>
+    <div>
+      <CardComponent>
+        <div className='flex flex-col gap-4'>
+          <InputComponent
+            value={userName}
+            placeholder={"Username"}
+            onChange={(e) => setUserName(e.target.value)}
+          />
+          <InputComponent
+            value={password}
+            placeholder={"Password"}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div className='mt-[16px]'>
+          <ButtonComponent title="Login" onClick={() => { }} />
+        </div>
+      </CardComponent>
+    </div>
   )
 }
 
