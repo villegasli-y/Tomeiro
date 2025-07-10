@@ -1,36 +1,43 @@
+import { useEffect, useState } from 'react';
 import InputComponent from '../components/inputComponent'
 import ButtonComponent from '../components/buttonComponent';
 import CardComponent from '../components/cardComponent';
-import { useState } from 'react';
 import WelcomePage from './welcomePage';
+import { saveUserLS, getUserLS, removeUserLS } from '../utils/userLocalStore';
 
 const Login = () => {
 
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState<{ username: string; password: string; } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (username && password) {
-      setUser({ username, password });
+      saveUserLS({ username: username, password: password });
       setIsLoggedIn(true);
     }
   }
 
   const handleLogOut = () => {
-    setUser(null);
+    setIsLoggedIn(false);
+    removeUserLS();
     setUserName("");
     setPassword("");
-    setIsLoggedIn(false);
   }
+
+  useEffect(() => {
+    const isUserLogged = getUserLS();
+    if (isUserLogged) {
+      setIsLoggedIn(true);
+    }
+  }, [])
 
   return (
     <div>
-      {isLoggedIn && user ? (
+      {isLoggedIn ? (
         <div className='animate-fade-in text-center text-xl font-bold text-black'>
-          <WelcomePage user={user} onLogout={handleLogOut} />
+          <WelcomePage onLogout={handleLogOut} />
         </div>
       ) : (
         <form onSubmit={handleLoginSubmit} className='animate-fade-in'>

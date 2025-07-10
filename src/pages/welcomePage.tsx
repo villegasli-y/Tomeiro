@@ -1,28 +1,22 @@
-import { useEffect } from "react";
+import { getUserLS } from "../utils/userLocalStore";
+import ButtonComponent from "../components/buttonComponent";
 
 type Props = {
-    user: { username: string; password: string };
     onLogout: () => void;
 };
 
 const WelcomePage = ({
-    user, onLogout
+    onLogout
 }: Props) => {
 
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            onLogout();
-        }, 5 * 60 * 1000);
-
-        return () => {
-            clearTimeout(timeoutId);
-        }
-    }, [onLogout])
+    const userData = getUserLS();
 
     return (
         <div className="animate-slide-in-left text-center text-xl font-bold text-black">
-            <pre>{JSON.stringify(user)}</pre>
-            <p>Welcome {user.username}!!!</p>
+            <p>Welcome {userData?.username}!!!</p>
+            <div className="mt-2">
+            <ButtonComponent title="LogOut" onClick={onLogout} styleText="text-white" />
+            </div>
         </div>
     )
 }
