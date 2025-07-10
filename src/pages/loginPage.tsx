@@ -13,7 +13,9 @@ const Login = () => {
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username && password) {
+    if (!username.trim() || !password.trim()) {
+      alert("All fields are required!");
+    }else {
       saveUserLS({ username: username, password: password });
       setIsLoggedIn(true);
     }
@@ -36,7 +38,7 @@ const Login = () => {
   return (
     <div>
       {isLoggedIn ? (
-        <div className='animate-fade-in text-center text-xl font-bold text-black'>
+        <div className='animate-fade-in'>
           <WelcomePage onLogout={handleLogOut} />
         </div>
       ) : (

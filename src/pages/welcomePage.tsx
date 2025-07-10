@@ -12,7 +12,7 @@ const WelcomePage = ({
     const userData = getUserLS();
 
     return (
-        <div className="animate-slide-in-left text-center text-xl font-bold text-black">
+        <div className="text-center text-xl font-bold text-black">
             <p>Welcome {userData?.username}!!!</p>
             <div className="mt-2">
             <ButtonComponent title="LogOut" onClick={onLogout} styleText="text-white" />
