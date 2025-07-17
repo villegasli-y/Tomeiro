@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import InputComponent from '../components/inputComponent'
 import ButtonComponent from '../components/buttonComponent';
 import CardComponent from '../components/cardComponent';
@@ -10,12 +10,13 @@ const Login = () => {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       alert("All fields are required!");
-    }else {
+    } else {
       saveUserLS({ username: username, password: password });
       setIsLoggedIn(true);
     }
@@ -29,6 +30,7 @@ const Login = () => {
   }
 
   useEffect(() => {
+    inputRef.current?.focus();
     const isUserLogged = getUserLS();
     if (isUserLogged) {
       setIsLoggedIn(true);
@@ -46,6 +48,7 @@ const Login = () => {
           <CardComponent>
             <div className='flex flex-col gap-4'>
               <InputComponent
+                ref={inputRef}
                 value={username}
                 placeholder={"Username"}
                 onChange={(e) => setUserName(e.target.value)}
