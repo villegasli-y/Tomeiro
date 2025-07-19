@@ -1,3 +1,5 @@
+import { setItem, getItem, removeItem } from "./localStoreManager";
+
 const USER_KEY = "user";
 
 interface User {
@@ -6,14 +8,13 @@ interface User {
 }
 
 export function saveUserLS(user: User) {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  setItem(USER_KEY, user);
 }
 
 export function getUserLS(): User | null {
-  const stored = localStorage.getItem(USER_KEY);
-  return stored ? JSON.parse(stored) : null;
+ return getItem<User>(USER_KEY);
 }
 
 export function removeUserLS() {
-  localStorage.removeItem(USER_KEY);
+  removeItem(USER_KEY);
 }
