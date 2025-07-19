@@ -1,18 +1,14 @@
-import { setItem, getItem, removeItem } from "./localStoreManager";
+import { getItem, setItem, removeItem } from "./localStoreManager";
+import type { User } from '../types/user';
 
 const USER_KEY = "user";
-
-interface User {
-  username: string;
-  password: string;
-}
 
 export function saveUserLS(user: User) {
   setItem(USER_KEY, user);
 }
 
 export function getUserLS(): User | null {
- return getItem<User>(USER_KEY);
+  return getItem<User>(USER_KEY);
 }
 
 export function removeUserLS() {

@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef } from 'react';
-import InputComponent from '../components/inputComponent'
-import ButtonComponent from '../components/buttonComponent';
-import CardComponent from '../components/cardComponent';
-import WelcomePage from './welcomePage';
-import { saveUserLS, getUserLS, removeUserLS } from '../utils/userLocalStore';
+import InputComponent from '../../components/inputComponent'
+import ButtonComponent from '../../components/buttonComponent';
+import CardComponent from '../../components/cardComponent';
+import WelcomePage from '../welcomePage';
+import { useLogin } from './useLogin';
 
 const Login = () => {
 
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { login, logOut, isLogged } = useLogin();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => isLogged());
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -17,25 +18,22 @@ const Login = () => {
     if (!username.trim() || !password.trim()) {
       alert("All fields are required!");
     } else {
-      saveUserLS({ username: username, password: password });
+      login({ username: username, password: password });
       setIsLoggedIn(true);
     }
   }
 
   const handleLogOut = () => {
+    logOut();
     setIsLoggedIn(false);
-    removeUserLS();
     setUserName("");
     setPassword("");
   }
 
   useEffect(() => {
     inputRef.current?.focus();
-    const isUserLogged = getUserLS();
-    if (isUserLogged) {
-      setIsLoggedIn(true);
-    }
   }, [])
+
 
   return (
     <div>
