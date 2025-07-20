@@ -1,31 +1,27 @@
 import { useEffect, useState, useRef } from 'react';
-import InputComponent from '../../components/inputComponent'
-import ButtonComponent from '../../components/buttonComponent';
-import CardComponent from '../../components/cardComponent';
-import WelcomePage from '../welcomePage';
-import { useLogin } from './useLogin';
+import InputComponent from '../components/inputComponent'
+import CardComponent from '../components/cardComponent';
+import { useUser } from '../hooks/useUser';
+import WelcomePage from './WelcomePage';
+import ButtonComponent from '../components/buttonComponent';
 
-const Login = () => {
+const LoginPage = () => {
 
-  const [username, setUserName] = useState("");
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const { login, logOut, isLogged } = useLogin();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => isLogged());
   const inputRef = useRef<HTMLInputElement>(null);
+  const { user, login } = useUser();
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !password.trim()) {
+    if (!userName.trim() || !password.trim()) {
       alert("All fields are required!");
     } else {
-      login({ username: username, password: password });
-      setIsLoggedIn(true);
+      login({ userName: userName })
     }
   }
 
   const handleLogOut = () => {
-    logOut();
-    setIsLoggedIn(false);
     setUserName("");
     setPassword("");
   }
@@ -34,10 +30,9 @@ const Login = () => {
     inputRef.current?.focus();
   }, [])
 
-
   return (
     <div>
-      {isLoggedIn ? (
+      {user.auth ? (
         <div className='animate-fade-in'>
           <WelcomePage onLogout={handleLogOut} />
         </div>
@@ -47,7 +42,7 @@ const Login = () => {
             <div className='flex flex-col gap-4'>
               <InputComponent
                 ref={inputRef}
-                value={username}
+                value={userName}
                 placeholder={"Username"}
                 onChange={(e) => setUserName(e.target.value)}
               />
@@ -67,4 +62,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default LoginPage

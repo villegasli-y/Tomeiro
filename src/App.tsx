@@ -1,11 +1,14 @@
 import './App.css'
-import LoginPage from './pages/login/loginPage'
+import UserProvider from './context/UserContext';
+import LoginPage from './pages/LoginPage';
 
 function App() {
 
   return (
     <div>
-      <LoginPage />
+      <UserProvider>
+        <LoginPage />
+      </UserProvider>
     </div>
   )
 }
