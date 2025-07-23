@@ -10,13 +10,19 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #f2f4f7;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   
+  --background: #f2f4f7;   /* Light mode background */
+  --text: #000000; 
+}
+
+.dark {
+  --background: #213547;    /* Dark mode background */
+  --text: #ffffff;  
 }
 
 a {
@@ -33,6 +39,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   height: 100%;
+  background-color: var(--background);
+  color: var(--text);
 }
 
 h1 {
