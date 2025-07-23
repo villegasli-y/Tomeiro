@@ -1,9 +1,10 @@
 type Props = {
-    title: string;
+    title?: string;
     onClick?: () => void;
     className?: string;
     styleText?: string;
     type?: "button" | "submit";
+    icon?: React.ReactNode
 }
 
 export default function ButtonComponent({
@@ -12,6 +13,7 @@ export default function ButtonComponent({
     className,
     styleText,
     type = "button",
+    icon,
 }: Props) {
     return (
         <div>
@@ -20,7 +22,7 @@ export default function ButtonComponent({
                 onClick={onClick}
                 className={`${className} bg-blue-500`}>
                 <div className={`${styleText} font-bold`}>
-                    {title}
+                    {title} {icon}
                 </div>
             </button>
         </div>
