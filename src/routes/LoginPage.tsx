@@ -2,42 +2,47 @@ import { useEffect, useState, useRef } from 'react';
 import InputComponent from '../components/inputComponent'
 import CardComponent from '../components/cardComponent';
 import { useUser } from '../hooks/useUser';
-import WelcomePage from './WelcomePage';
 import ButtonComponent from '../components/buttonComponent';
+import { createFileRoute } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
-const LoginPage = () => {
+export const Route = createFileRoute('/LoginPage')({
+  component: LoginPage, 
+})
 
+function LoginPage() {
+  
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { user, login } = useUser();
+  const { login } = useUser();
+  const navigate = useNavigate();
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userName.trim() || !password.trim()) {
       alert("All fields are required!");
     } else {
-      login({ userName: userName })
+      login({ userName: userName });
+      navigate({to: '/WelcomePage'});
     }
-  }
-
-  const handleLogOut = () => {
-    setUserName("");
-    setPassword("");
   }
 
   useEffect(() => {
     inputRef.current?.focus();
+    setUserName("");
+    setPassword("");
   }, [])
 
   return (
     <>
-      {user.auth ? (
+      {/* {user.auth ? (
         <div className='animate-fade-in'>
           <WelcomePage onLogout={handleLogOut} />
         </div>
-      ) : (
-        <form onSubmit={handleLoginSubmit} className='animate-fade-in w-full flex justify-center'>
+      ) : ( */}
+
+        <form onSubmit={handleLoginSubmit} className='animate-fade-in flex justify-center'>
           <CardComponent>
             <div className='flex flex-col items-center gap-4'>
               <div className='w-full flex flex-col gap-4 '>
@@ -59,7 +64,7 @@ const LoginPage = () => {
             </div>
           </CardComponent>
         </form>
-      )}
+      {/* )} */}
     </>
   )
 }
