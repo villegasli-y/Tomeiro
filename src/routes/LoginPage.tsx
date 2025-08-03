@@ -1,18 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
-import InputComponent from '../components/inputComponent'
-import CardComponent from '../components/cardComponent';
 import { useUser } from '../hooks/useUser';
-import ButtonComponent from '../components/buttonComponent';
 import { createFileRoute } from '@tanstack/react-router';
 import { useNavigate } from '@tanstack/react-router';
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export const Route = createFileRoute('/LoginPage')({
-  component: LoginPage, 
+  component: LoginPage,
 })
 
 function LoginPage() {
-  
-  const [userName, setUserName] = useState("");
+
+  const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const { login } = useUser();
@@ -20,11 +20,11 @@ function LoginPage() {
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userName.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       alert("All fields are required!");
     } else {
-      login({ userName: userName });
-      navigate({to: '/WelcomePage'});
+      login({ username: username });
+      navigate({ to: '/WelcomePage' });
     }
   }
 
@@ -36,35 +36,33 @@ function LoginPage() {
 
   return (
     <>
-      {/* {user.auth ? (
-        <div className='animate-fade-in'>
-          <WelcomePage onLogout={handleLogOut} />
-        </div>
-      ) : ( */}
-
-        <form onSubmit={handleLoginSubmit} className='animate-fade-in flex justify-center'>
-          <CardComponent>
-            <div className='flex flex-col items-center gap-4'>
-              <div className='w-full flex flex-col gap-4 '>
-                <InputComponent
-                  ref={inputRef}
-                  value={userName}
-                  placeholder={"Username"}
-                  onChange={(e) => setUserName(e.target.value)}
-                />
-                <InputComponent
-                  value={password}
-                  placeholder={"Password"}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className=''>
-                <ButtonComponent title="Login" type='submit' />
-              </div>
+      <form onSubmit={handleLoginSubmit} className='animate-fade-in'>
+        <Card className='p-4 w-[396px] rounded-lg' style={{ boxShadow: '0 2px 4px #0000001a, 0 8px 16px #0000001a' }}>
+          <CardContent className='flex  justify-center items-center flex-col gap-4'>
+            <div className='w-full'>
+              <Input
+                id='username'
+                type='username'
+                value={username}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder='Username'
+              />
             </div>
-          </CardComponent>
-        </form>
-      {/* )} */}
+            <div className='w-full'>
+              <Input
+                id='username'
+                type='password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder='Password'
+              />
+            </div>
+          </CardContent>
+          <CardFooter className='flex justify-center items-center'>
+            <Button type="submit" onSubmit={handleLoginSubmit}>Login</Button>
+          </CardFooter>
+        </Card>
+      </form>
     </>
   )
 }
