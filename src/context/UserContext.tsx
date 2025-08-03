@@ -17,10 +17,10 @@ const UserContext = createContext<UserContextType | null>(null)
 
 const UserProvider = ({ children }: Props) => {
 
-    const [user, setUser] = useState<User>({ id: '', userName: '', auth: false });
+    const [user, setUser] = useState<User>({ id: '', username: '', auth: false });
     const emptyUser = {
         id: '',
-        userName: '',
+        username: '',
         auth: false,
     }
 
