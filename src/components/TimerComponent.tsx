@@ -1,44 +1,59 @@
 import { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
+import { useTimer } from '@/hooks/useTimer'
 
 const TimerComponent = () => {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-  const [tempHours, setTempHours] = useState(0);
-  const [tempMinutes, setTempMinutes] = useState(0);
-  const [tempSeconds, setTempSeconds] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [cancelEnabled, setCancelEnabled] = useState(false);
-  const [isPause, setIsPause] = useState(false);
-
-  const handlePause = () => {
-    setIsRunning(false);
-    setIsPause(true);
-  }
+  const { timer, startTimerData, resumeTimerData, pauseTimerData, cancelTimer } = useTimer();
 
   const handleStart = () => {
-    setIsRunning(true);
-    setIsPause(false);
-    setCancelEnabled(true);
-    setTempHours(hours);
-    setTempMinutes(minutes);
-    setTempSeconds(seconds);
+    startTimerData({
+      hours: hours, minutes: minutes, seconds: seconds,
+      tempHours: hours, tempMinutes: minutes, tempSeconds: seconds,
+    })
+  }
+
+  const handlePause = () => {
+    pauseTimerData({
+      hours: hours, minutes: minutes, seconds: seconds,
+    })
+  }
+
+  const handleResume = () => {
+    resumeTimerData({
+      hours: hours, minutes: minutes, seconds: seconds,
+    })
   }
 
   const handleCancel = () => {
-    setIsRunning(false);
-    setCancelEnabled(false);
-    setIsPause(false)
-    setHours(tempHours)
-    setMinutes(tempMinutes);
-    setSeconds(tempSeconds);
+    cancelTimer({ tempHours: timer.tempHours, tempMinutes: timer.tempMinutes, tempSeconds: timer.tempSeconds })
+    setHours(timer.tempHours)
+    setMinutes(timer.tempMinutes);
+    setSeconds(timer.tempSeconds);
   }
 
   useEffect(() => {
+    if (timer.isPause) {
+      setHours(timer.hours);
+      setMinutes(timer.minutes);
+      setSeconds(timer.seconds);
+    }
+  }, [timer.isPause])
+
+  useEffect(() => {
+    if (!timer.isRunning && !timer.isPause) {
+      setHours(timer.tempHours);
+      setMinutes(timer.tempMinutes);
+      setSeconds(timer.tempSeconds);
+    }
+  }, [timer.isRunning, timer.isPause])
+
+  useEffect(() => {
     let interValID: string | number | NodeJS.Timeout | undefined;
-    if (isRunning) {
+    if (timer.isRunning) {
       interValID = setInterval(() => {
         if (hours > 0 && minutes === 0 && seconds === 0) {
           setMinutes(prev => prev + 60);
@@ -58,7 +73,7 @@ const TimerComponent = () => {
       clearInterval(interValID);
     }
 
-  }, [isRunning, hours, minutes, seconds])
+  }, [timer.isRunning, hours, minutes, seconds])
 
   return (
     <div className='flex flex-col border bg-emerald-900 rounded-lg p-4'>
@@ -103,11 +118,10 @@ const TimerComponent = () => {
         </div>
       </div>
       <div className='flex flex-row justify-between mt-4'>
-        <Button onClick={handleCancel} disabled={!cancelEnabled} >Cancel</Button>
-
-        {isRunning && <Button onClick={handlePause}>Pause</Button>}
-        {!isRunning && !isPause && <Button onClick={handleStart}>Start</Button>}
-        {isPause && <Button onClick={handleStart}>Resume</Button>}
+        <Button onClick={handleCancel} disabled={!timer.cancelEnabled} >Cancel</Button>
+        {timer.isRunning && <Button onClick={handlePause}>Pause</Button>}
+        {!timer.isRunning && !timer.isPause && <Button onClick={handleStart}>Start</Button>}
+        {timer.isPause && <Button onClick={handleResume}>Resume</Button>}
       </div>
     </div>
   )
