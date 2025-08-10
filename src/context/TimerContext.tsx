@@ -87,7 +87,7 @@ const TimerProvider = ({ children }: Props) => {
 
     return (
 
-        <TimerContext.Provider value={{ timer, initializeTimer, pauseTimer, resumeTimer, cancelTimer, completeTimer, cleanTimerData }}>
+        <TimerContext.Provider value={{ timer, initializeTimer, pauseTimer, resumeTimer, cancelTimer, completedTimer, cleanTimerData }}>
             {children}
         </TimerContext.Provider>
     )
