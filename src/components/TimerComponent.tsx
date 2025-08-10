@@ -7,23 +7,27 @@ const TimerComponent = () => {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-  const { timer, startTimerData, resumeTimerData, pauseTimerData, cancelTimer } = useTimer();
+  const { timer, initializeTimer, pauseTimer, resumeTimer, cancelTimer, completedTimer } = useTimer();
 
   const handleStart = () => {
-    startTimerData({
-      hours: hours, minutes: minutes, seconds: seconds,
-      tempHours: hours, tempMinutes: minutes, tempSeconds: seconds,
-    })
+    if (isNaN(hours) || hours >= 0 && isNaN(minutes) || minutes >= 0 && isNaN(seconds) || seconds === 0) {
+      alert("Please fill the timer values");
+    } else {
+      initializeTimer({
+        hours: hours, minutes: minutes, seconds: seconds,
+        tempHours: hours, tempMinutes: minutes, tempSeconds: seconds,
+      })
+    }
   }
 
   const handlePause = () => {
-    pauseTimerData({
+    pauseTimer({
       hours: hours, minutes: minutes, seconds: seconds,
     })
   }
 
   const handleResume = () => {
-    resumeTimerData({
+    resumeTimer({
       hours: hours, minutes: minutes, seconds: seconds,
     })
   }
@@ -55,6 +59,12 @@ const TimerComponent = () => {
     let interValID: string | number | NodeJS.Timeout | undefined;
     if (timer.isRunning) {
       interValID = setInterval(() => {
+        if (hours === 0 && minutes === 0 && seconds === 0) {
+          completedTimer({ hours: hours, minutes: minutes, seconds: seconds });
+          setTimeout(() => {
+            alert("Timer has finished");
+          }, 100);
+        }
         if (hours > 0 && minutes === 0 && seconds === 0) {
           setMinutes(prev => prev + 60);
           setHours(prev => prev - 1);
@@ -87,7 +97,16 @@ const TimerComponent = () => {
             type='number'
             placeholder='00'
             value={hours}
-            onChange={(e) => setHours(parseInt(e.target.value))}
+            min={0}
+            disabled={timer.isRunning}
+            onChange={(e) => {
+              let number = parseInt(e.target.value, 10);
+              if (isNaN(number)) number = 0;
+              if (number < 0) number = 0;
+              if (number > 23) number = 23;
+              setHours(number);
+            }
+            }
           />
         </div>
         <p className='font-bold text-white'>:</p>
@@ -100,7 +119,16 @@ const TimerComponent = () => {
             type='number'
             placeholder='00'
             value={minutes}
-            onChange={(e) => setMinutes(parseInt(e.target.value))}
+            min={0}
+            disabled={timer.isRunning}
+            onChange={(e) => {
+              let number = parseInt(e.target.value, 10);
+              if (isNaN(number)) number = 0;
+              if (number < 0) number = 0;
+              if (number > 60) number = 59;
+              setMinutes(number);
+            }
+            }
           />
         </div>
         <p className='font-bold text-white '>:</p>
@@ -113,7 +141,16 @@ const TimerComponent = () => {
             type='number'
             placeholder='00'
             value={seconds}
-            onChange={(e) => setSeconds(parseInt(e.target.value))}
+            min={0}
+            disabled={timer.isRunning}
+            onChange={(e) => {
+              let number = parseInt(e.target.value, 10);
+              if (isNaN(number)) number = 0;
+              if (number < 0) number = 0;
+              if (number > 60) number = 59;
+              setSeconds(number);
+            }
+            }
           />
         </div>
       </div>

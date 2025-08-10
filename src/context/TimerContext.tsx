@@ -4,10 +4,11 @@ import { getTimerLS, saveTimerLS, removeTimerLS } from "@/utils/timerLocalStore"
 
 interface TimerContextType {
     timer: Timer;
-    startTimerData: (timerData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled'>) => void;
-    pauseTimerData: (timerPauseData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => void;
-    resumeTimerData: (timerResumeData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => void;
-    cancelTimer: (timerData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'hours' | 'minutes' | 'seconds'>) => void;
+    initializeTimer: (initialValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled'>) => void;
+    pauseTimer: (currentValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => void;
+    resumeTimer: (currentValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => void;
+    cancelTimer: (baseValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'hours' | 'minutes' | 'seconds'>) => void;
+    completedTimer: (finalValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => void;
     cleanTimerData: () => void;
 }
 
@@ -49,28 +50,34 @@ const TimerProvider = ({ children }: Props) => {
         }
     }, [])
 
-    const startTimerData = (timerData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled'>) => {
-        const timerPayload: Timer = { ...timerData, isRunning: true, isPause: false, cancelEnabled: true };
-        setTimer(timerPayload);
-        saveTimerLS(timerPayload);
+    const initializeTimer = (initialValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled'>) => {
+        const payload: Timer = { ...initialValues, isRunning: true, isPause: false, cancelEnabled: true };
+        setTimer(payload);
+        saveTimerLS(payload);
     }
 
-    const pauseTimerData = (timerPauseData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => {
-        const timerPausePayload: Timer = { ...timerPauseData, isRunning: false, isPause: true, cancelEnabled: true, tempHours: timer.tempHours, tempMinutes: timer.tempMinutes, tempSeconds: timer.tempSeconds };
-        setTimer(timerPausePayload);
-        saveTimerLS(timerPausePayload);
+    const pauseTimer = (currentValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => {
+        const payload: Timer = { ...currentValues, isRunning: false, isPause: true, cancelEnabled: true, tempHours: timer.tempHours, tempMinutes: timer.tempMinutes, tempSeconds: timer.tempSeconds };
+        setTimer(payload);
+        saveTimerLS(payload);
     }
 
-    const resumeTimerData = (timerResumeData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => {
-        const timerPausePayload: Timer = { ...timerResumeData, isRunning: true, isPause: false, cancelEnabled: true, tempHours: timer.tempHours, tempMinutes: timer.tempMinutes, tempSeconds: timer.tempSeconds };
-        setTimer(timerPausePayload);
-        saveTimerLS(timerPausePayload);
+    const resumeTimer = (currentValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => {
+        const payload: Timer = { ...currentValues, isRunning: true, isPause: false, cancelEnabled: true, tempHours: timer.tempHours, tempMinutes: timer.tempMinutes, tempSeconds: timer.tempSeconds };
+        setTimer(payload);
+        saveTimerLS(payload);
     }
 
-    const cancelTimer = (timerData: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'hours' | 'minutes' | 'seconds'>) => {
-        const timerCancelPayload: Timer = { ...timerData, isRunning: false, isPause: false, cancelEnabled: false, hours: timer.tempHours, minutes: timer.tempMinutes, seconds: timer.tempSeconds };
-        setTimer(timerCancelPayload);
-        saveTimerLS(timerCancelPayload);
+    const cancelTimer = (baseValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'hours' | 'minutes' | 'seconds'>) => {
+        const payload: Timer = { ...baseValues, isRunning: false, isPause: false, cancelEnabled: false, hours: timer.tempHours, minutes: timer.tempMinutes, seconds: timer.tempSeconds };
+        setTimer(payload);
+        saveTimerLS(payload);
+    }
+
+     const completedTimer = (finalValues: Omit<Timer, 'isRunning' | 'isPause' | 'cancelEnabled' | 'tempHours' | 'tempMinutes' | 'tempSeconds'>) => {
+        const payload: Timer = { ...finalValues, isRunning: false, isPause: false, cancelEnabled: false, tempHours: timer.tempHours, tempMinutes: timer.tempMinutes, tempSeconds: timer.tempSeconds };
+        setTimer(payload);
+        saveTimerLS(payload);
     }
 
     const cleanTimerData = () => {
@@ -80,7 +87,7 @@ const TimerProvider = ({ children }: Props) => {
 
     return (
 
-        <TimerContext.Provider value={{ timer, startTimerData, resumeTimerData, pauseTimerData, cancelTimer, cleanTimerData }}>
+        <TimerContext.Provider value={{ timer, initializeTimer, pauseTimer, resumeTimer, cancelTimer, completeTimer, cleanTimerData }}>
             {children}
         </TimerContext.Provider>
     )
