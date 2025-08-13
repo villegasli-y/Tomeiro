@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { useTimer } from '@/hooks/useTimer'
@@ -9,58 +9,87 @@ const TimerComponent = () => {
   const [seconds, setSeconds] = useState(0);
   const { timer, initializeTimer, pauseTimer, resumeTimer, cancelTimer, completedTimer } = useTimer();
 
+  const saveTimerState = useCallback(() => {
+    if (timer.isRunning) {
+      pauseTimer({
+        ...timer,
+        hours,
+        minutes,
+        seconds
+      });
+    }
+  }, [timer, hours, minutes, seconds, pauseTimer]);
+
   const handleStart = () => {
-    if (isNaN(hours) || hours >= 0 && isNaN(minutes) || minutes >= 0 && isNaN(seconds) || seconds === 0) {
+    if (hours === 0 && minutes === 0 && seconds === 0) {
       alert("Please fill the timer values");
     } else {
       initializeTimer({
-        hours: hours, minutes: minutes, seconds: seconds,
-        tempHours: hours, tempMinutes: minutes, tempSeconds: seconds,
+        ...timer,
+        hours,
+        minutes,
+        seconds,
+        tempHours: hours,
+        tempMinutes: minutes,
+        tempSeconds: seconds,
       })
     }
   }
 
   const handlePause = () => {
     pauseTimer({
-      hours: hours, minutes: minutes, seconds: seconds,
+      ...timer,
+      hours,
+      minutes,
+      seconds,
     })
   }
 
   const handleResume = () => {
     resumeTimer({
-      hours: hours, minutes: minutes, seconds: seconds,
+      ...timer,
+      hours,
+      minutes,
+      seconds
     })
   }
 
   const handleCancel = () => {
-    cancelTimer({ tempHours: timer.tempHours, tempMinutes: timer.tempMinutes, tempSeconds: timer.tempSeconds })
-    setHours(timer.tempHours)
-    setMinutes(timer.tempMinutes);
-    setSeconds(timer.tempSeconds);
+    cancelTimer({
+      ...timer,
+      hours: timer.tempHours,
+      minutes: timer.tempMinutes,
+      seconds: timer.tempSeconds
+    });
   }
 
-  useEffect(() => {
-    if (timer.isPause) {
-      setHours(timer.hours);
-      setMinutes(timer.minutes);
-      setSeconds(timer.seconds);
-    }
-  }, [timer.isPause])
-
+  //fill the states if we had info the localstore & fill the states when the tab where close or unmount the component
   useEffect(() => {
     if (!timer.isRunning && !timer.isPause) {
       setHours(timer.tempHours);
       setMinutes(timer.tempMinutes);
       setSeconds(timer.tempSeconds);
+    } else {
+      setHours(timer.hours);
+      setMinutes(timer.minutes);
+      setSeconds(timer.seconds);
     }
-  }, [timer.isRunning, timer.isPause])
 
+  }, [timer.isRunning, timer.isPause, timer.tempHours, timer.tempMinutes, timer.tempSeconds, timer.hours, timer.minutes, timer.seconds]);
+
+
+  //main functionality
   useEffect(() => {
     let interValID: string | number | NodeJS.Timeout | undefined;
     if (timer.isRunning) {
       interValID = setInterval(() => {
         if (hours === 0 && minutes === 0 && seconds === 0) {
-          completedTimer({ hours: hours, minutes: minutes, seconds: seconds });
+          completedTimer({
+            ...timer,
+            hours,
+            minutes,
+            seconds
+          });
           setTimeout(() => {
             alert("Timer has finished");
           }, 100);
@@ -83,7 +112,17 @@ const TimerComponent = () => {
       clearInterval(interValID);
     }
 
-  }, [timer.isRunning, hours, minutes, seconds])
+  }, [timer.isRunning, hours, minutes, seconds, completedTimer, timer])
+
+
+  //Save the timer state when user close or refresh the page
+  useEffect(() => {
+    window.addEventListener('beforeunload', saveTimerState);
+
+    return () => {
+      window.removeEventListener('beforeunload', saveTimerState);
+    };
+  }, [saveTimerState]);
 
   return (
     <div className='flex flex-col border bg-emerald-900 rounded-lg p-4'>
