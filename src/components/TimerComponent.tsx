@@ -2,12 +2,19 @@ import { useEffect, useState, useCallback } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { useTimer } from '@/hooks/useTimer'
+import { getTimerToDisplay, parseSecondsToTime } from '@/lib/timer-utils'
 
 const TimerComponent = () => {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
+  const [tempSeconds, setTempSeconds] = useState(0);
+
+  const parsedTime = parseSecondsToTime(tempSeconds);
+  const displayTime = getTimerToDisplay(parsedTime);
   const { timer, initializeTimer, pauseTimer, resumeTimer, cancelTimer, completedTimer } = useTimer();
+
+  console.log(parsedTime);
 
   const saveTimerState = useCallback(() => {
     if (timer.isRunning) {
@@ -21,54 +28,54 @@ const TimerComponent = () => {
   }, [timer, hours, minutes, seconds, pauseTimer]);
 
   const handleStart = () => {
-    if (hours === 0 && minutes === 0 && seconds === 0) {
-      alert("Please fill the timer values");
-    } else {
-      initializeTimer({
-        ...timer,
-        hours,
-        minutes,
-        seconds,
-        tempHours: hours,
-        tempMinutes: minutes,
-        tempSeconds: seconds,
-      })
-    }
+    // if (hours === 0 && minutes === 0 && seconds === 0) {
+    //   alert("Please fill the timer values");
+    // } else {
+    initializeTimer({
+      ...timer,
+      hours: parsedTime.hours,
+      minutes: parsedTime.minutes,
+      seconds: parsedTime.seconds,
+      tempHours: hours,
+      tempMinutes: minutes,
+      tempSeconds: seconds,
+    })
+    // }
   }
 
   const handlePause = () => {
     pauseTimer({
       ...timer,
-      hours,
-      minutes,
-      seconds,
+      hours: parsedTime.hours,
+      minutes: parsedTime.minutes,
+      seconds: parsedTime.seconds,
     })
   }
 
   const handleResume = () => {
     resumeTimer({
       ...timer,
-      hours,
-      minutes,
-      seconds
+      hours: parsedTime.hours,
+      minutes: parsedTime.minutes,
+      seconds: parsedTime.seconds,
     })
   }
 
   const handleCancel = () => {
     cancelTimer({
       ...timer,
-      hours: timer.tempHours,
-      minutes: timer.tempMinutes,
-      seconds: timer.tempSeconds
+      hours: parsedTime.hours,
+      minutes: parsedTime.minutes,
+      seconds: parsedTime.seconds
     });
   }
 
   //fill the states if we had info the localstore & fill the states when the tab where close or unmount the component
   useEffect(() => {
     if (!timer.isRunning && !timer.isPause) {
-      setHours(timer.tempHours);
-      setMinutes(timer.tempMinutes);
-      setSeconds(timer.tempSeconds);
+      setHours(parseInt(displayTime.displayHours));
+      setMinutes(parseInt(displayTime.displayMinutes));
+      setSeconds(parseInt(displayTime.displaySeconds));
     } else {
       setHours(timer.hours);
       setMinutes(timer.minutes);
@@ -79,40 +86,57 @@ const TimerComponent = () => {
 
 
   //main functionality
+  // useEffect(() => {
+  //   let interValID: string | number | NodeJS.Timeout | undefined;
+  //   if (timer.isRunning) {
+  //     interValID = setInterval(() => {
+  //       if (hours === 0 && minutes === 0 && seconds === 0) {
+  //         completedTimer({
+  //           ...timer,
+  //           hours,
+  //           minutes,
+  //           seconds
+  //         });
+  //         setTimeout(() => {
+  //           alert("Timer has finished");
+  //         }, 100);
+  //       }
+  //       if (hours > 0 && minutes === 0 && seconds === 0) {
+  //         setMinutes(prev => prev + 60);
+  //         setHours(prev => prev - 1);
+  //       }
+  //       if (seconds === 0) {
+  //         setSeconds(prev => prev + 59);
+  //         setMinutes(prev => prev - 1);
+  //       }
+  //       if (seconds > 0) {
+  //         setSeconds(prev => prev - 1);
+  //       }
+  //     }, 1000)
+  //   }
+
+  //   return () => {
+  //     clearInterval(interValID);
+  //   }
+
+  // }, [timer.isRunning, hours, minutes, seconds, completedTimer, timer])
+
   useEffect(() => {
     let interValID: string | number | NodeJS.Timeout | undefined;
     if (timer.isRunning) {
       interValID = setInterval(() => {
-        if (hours === 0 && minutes === 0 && seconds === 0) {
-          completedTimer({
-            ...timer,
-            hours,
-            minutes,
-            seconds
-          });
-          setTimeout(() => {
-            alert("Timer has finished");
-          }, 100);
+        setTempSeconds(prev => {
+          const currentTime = prev + 1
+          return (currentTime);
         }
-        if (hours > 0 && minutes === 0 && seconds === 0) {
-          setMinutes(prev => prev + 60);
-          setHours(prev => prev - 1);
-        }
-        if (seconds === 0) {
-          setSeconds(prev => prev + 59);
-          setMinutes(prev => prev - 1);
-        }
-        if (seconds > 0) {
-          setSeconds(prev => prev - 1);
-        }
-      }, 1000)
+        )
+      }, 1000);
     }
 
     return () => {
       clearInterval(interValID);
     }
-
-  }, [timer.isRunning, hours, minutes, seconds, completedTimer, timer])
+  }, [timer.isRunning])
 
 
   //Save the timer state when user close or refresh the page
@@ -135,7 +159,7 @@ const TimerComponent = () => {
             maxLength={2}
             type='number'
             placeholder='00'
-            value={hours}
+            value={displayTime.displayHours}
             min={0}
             disabled={timer.isRunning}
             onChange={(e) => {
@@ -157,7 +181,7 @@ const TimerComponent = () => {
             maxLength={2}
             type='number'
             placeholder='00'
-            value={minutes}
+            value={displayTime.displayMinutes}
             min={0}
             disabled={timer.isRunning}
             onChange={(e) => {
@@ -179,7 +203,7 @@ const TimerComponent = () => {
             maxLength={2}
             type='number'
             placeholder='00'
-            value={seconds}
+            value={displayTime.displaySeconds}
             min={0}
             disabled={timer.isRunning}
             onChange={(e) => {
