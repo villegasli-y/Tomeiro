@@ -1,11 +1,17 @@
-export interface Timer {
-    hours: number;
-    minutes: number;
-    seconds: number;
-    tempHours: number;
-    tempMinutes: number;
-    tempSeconds: number;
-    isPause: boolean;
-    isRunning: boolean;
-    cancelEnabled: boolean;
+export interface TimerState {
+  isPaused: boolean;
+  isRunning: boolean;
+  cancelEnabled: boolean;
 }
+
+export type TimeData = {
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+export type TimeStringData = {
+  hours: string;
+  minutes: string;
+  seconds: string;
+};

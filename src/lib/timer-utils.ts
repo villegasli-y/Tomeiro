@@ -1,4 +1,6 @@
-export const parseSecondsToTime = (totalSeconds: number | string) => {
+import type { TimeData, TimeStringData } from "@/types/timer";
+
+export const parseSecondsToTime = (totalSeconds: number | string): TimeData => {
   let seconds = Number(totalSeconds);
   let hours = 0;
   let minutes = 0;
@@ -19,16 +21,21 @@ export const parseSecondsToTime = (totalSeconds: number | string) => {
   return { hours, minutes, seconds };
 };
 
-type ParsedTime = {
-  hours: number;
-  minutes: number;
-  seconds: number;
-};
+export const getStringTime = (time: number): string =>
+  time < 10 ? "0" + time : String(time);
 
-export const getTimerToDisplay = ({ hours, minutes, seconds }: ParsedTime) => {
-  const displayHours = hours < 10 ? "0" + hours : String(hours);
-  const displayMinutes = minutes < 10 ? "0" + minutes : String(minutes);
-  const displaySeconds = seconds < 10 ? "0" + seconds : String(seconds);
+export const getTimerToDisplay = (
+  totalSeconds: number | string
+): TimeStringData => {
+  const {
+    hours: numHours,
+    minutes: numMinites,
+    seconds: numSeconds,
+  } = parseSecondsToTime(totalSeconds);
 
-  return { displayHours, displayMinutes, displaySeconds };
+  return {
+    hours: getStringTime(numHours),
+    minutes: getStringTime(numMinites),
+    seconds: getStringTime(numSeconds),
+  };
 };
