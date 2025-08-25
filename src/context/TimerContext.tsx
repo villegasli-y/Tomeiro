@@ -1,97 +1,134 @@
-import { createContext, useEffect, type ReactNode, useState } from "react";
-import type { Timer } from "@/types/timer";
-import { getTimerLS, saveTimerLS, removeTimerLS } from "@/utils/timerLocalStore";
+import {
+  createContext,
+  type ReactNode,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
+import type { TimeData, TimerState } from "@/types/timer";
+import { removeTimerLS } from "@/utils/timerLocalStore";
+import { parseSecondsToTime } from "@/lib/timer-utils";
 
-interface TimerContextType {
-    timer: Timer;
-    initializeTimer: (initialValues: Timer) => void;
-    pauseTimer: (currentValues: Timer) => void;
-    resumeTimer: (currentValues: Timer) => void;
-    cancelTimer: (baseValues: Timer) => void;
-    completedTimer: (finalValues: Timer) => void;
-    cleanTimerData: () => void;
-}
+type TimerContextType = TimerState & {
+  start: () => void; // TODO: pass initial value
+  cancel: () => void;
+  clear: () => void;
+  pause: () => void;
+  time: TimeData;
+};
 
 type Props = {
-    children: ReactNode,
-}
+  children: ReactNode;
+};
 
-const TimerContext = createContext<TimerContextType | null>(null)
+const INITIAL_TIME: TimeData = {
+  hours: 0,
+  seconds: 0,
+  minutes: 0,
+};
+
+const INITIAL_TIMER_STATE: TimerState = {
+  cancelEnabled: false,
+  isPaused: false,
+  isRunning: false,
+};
+
+const INITIAL_CONTEXT: TimerContextType = {
+  ...INITIAL_TIMER_STATE,
+  time: INITIAL_TIME,
+  clear: () => {
+    return;
+  },
+  start: () => {
+    return;
+  },
+  cancel: () => {
+    return;
+  },
+  pause: () => {
+    return;
+  },
+};
+
+const TimerContext = createContext<TimerContextType | null>(INITIAL_CONTEXT);
 
 const TimerProvider = ({ children }: Props) => {
+  // TODO: pause timer without removing current time
 
-    const [timer, setTimer] = useState<Timer>({
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        tempHours: 0,
-        tempMinutes: 0,
-        tempSeconds: 0,
-        isPause: false,
-        isRunning: false,
-        cancelEnabled: false,
-    });
-    const emptyTimer = {
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        tempHours: 0,
-        tempMinutes: 0,
-        tempSeconds: 0,
-        isPause: false,
-        isRunning: false,
-        cancelEnabled: false,
+  const startRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  // TODO: valor por defecto, asignar aqui al animation frame
+  const [time, setTime] = useState<TimeData>(INITIAL_TIME);
+  const [state, setState] = useState<TimerState>(INITIAL_TIMER_STATE);
+
+  // TODO: set what is on LS
+  //   useEffect(() => {
+  //     const storedTimer = getTimerLS();
+  //     if (storedTimer) {
+  //       setTimer(storedTimer);
+  //     }
+  //   }, []);
+
+  const updateTimer = () => {
+    const now = performance.now();
+
+    if (startRef.current) {
+      // TODO: make functionality to count backwards
+      const parsedSeconds = Math.trunc((now - startRef.current) / 1000);
+      setTime(parseSecondsToTime(parsedSeconds));
+      animationFrameRef.current = requestAnimationFrame(updateTimer);
     }
+  };
 
-    useEffect(() => {
-        const storedTimer = getTimerLS();
-        if (storedTimer) {
-            setTimer(storedTimer);
-        }
-    }, [])
-
-    const initializeTimer = (initialValues: Timer) => {
-        const payload: Timer = { ...initialValues, isRunning: true, isPause: false, cancelEnabled: true };
-        setTimer(payload);
-        saveTimerLS(payload);
+  const cancelTimer = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+      startRef.current = null;
     }
+  };
 
-    const pauseTimer = (currentValues: Timer) => {
-        const payload: Timer = { ...currentValues, isRunning: false, isPause: true, cancelEnabled: true };
-        setTimer(payload);
-        saveTimerLS(payload);
+  const pauseTimer = () => {
+    // TODO: handle resume functionlatity
+    return;
+  };
+
+  const startTimer = () => {
+    if (!startRef.current) {
+      startRef.current = performance.now();
+      updateTimer();
     }
+  };
 
-    const resumeTimer = (currentValues: Timer) => {
-        const payload: Timer = { ...currentValues, isRunning: true, isPause: false, cancelEnabled: true };
-        setTimer(payload);
-        saveTimerLS(payload);
-    }
+  // TODO: clear timer data
+  const cleanTimerState = () => {
+    setState(INITIAL_TIMER_STATE);
+    removeTimerLS();
+  };
 
-    const cancelTimer = (baseValues: Timer) => {
-        const payload: Timer = { ...baseValues, isRunning: false, isPause: false, cancelEnabled: false };
-        setTimer(payload);
-        saveTimerLS(payload);
-    }
+  const timerContextValue = useMemo(
+    () => ({
+      ...state,
+      time,
+    }),
+    [state, time]
+  );
 
-    const completedTimer = (finalValues: Timer) => {
-        const payload: Timer = { ...finalValues, isRunning: false, isPause: false, cancelEnabled: false };
-        setTimer(payload);
-        saveTimerLS(payload);
-    }
-
-    const cleanTimerData = () => {
-        setTimer(emptyTimer);
-        removeTimerLS();
-    }
-
-    return (
-
-        <TimerContext.Provider value={{ timer, initializeTimer, pauseTimer, resumeTimer, cancelTimer, completedTimer, cleanTimerData }}>
-            {children}
-        </TimerContext.Provider>
-    )
-}
+  return (
+    <TimerContext.Provider
+      value={{
+        start: startTimer,
+        cancel: cancelTimer,
+        pause: pauseTimer,
+        clear: cleanTimerState,
+        ...timerContextValue,
+      }}
+    >
+      {children}
+    </TimerContext.Provider>
+  );
+};
 
 export default TimerProvider;
 export { TimerContext };
