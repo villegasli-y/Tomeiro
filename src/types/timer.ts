@@ -1,7 +1,9 @@
+// TODO: move this to timercontext type
 export interface TimerState {
   isPaused: boolean;
   isRunning: boolean;
   cancelEnabled: boolean;
+  startedAt?: number;
 }
 
 export type TimeData = {
