@@ -7,6 +7,7 @@ export const TimerComponent = () => {
     start,
     time: { hours, seconds, minutes },
     cancel,
+    pause,
   } = useTimer();
 
   return (
@@ -24,6 +25,7 @@ export const TimerComponent = () => {
       </div>
       <div className="flex flex-row gap-2">
         <Button onClick={cancel}>Cancel</Button>
+        <Button onClick={pause}>Pause</Button>
         <Button onClick={start}>Start</Button>
       </div>
     </div>

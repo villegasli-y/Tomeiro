@@ -1,7 +1,8 @@
 import type { TimeData, TimeStringData } from "@/types/timer";
 
 export const parseSecondsToTime = (totalSeconds: number | string): TimeData => {
-  let seconds = Number(totalSeconds);
+  const parsedSeconds = Math.trunc(Number(totalSeconds) / 1000);
+  let seconds = parsedSeconds;
   let hours = 0;
   let minutes = 0;
   let secondsToMinutes = 0;
