@@ -11,6 +11,8 @@ import {
 
 const TimerContext = createContext<TimerContextType | null>(INITIAL_CONTEXT);
 
+function InitialValues(): number { return (125) }
+
 const TimerProvider = ({ children }: TimerProviderProps) => {
   const startRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -18,37 +20,40 @@ const TimerProvider = ({ children }: TimerProviderProps) => {
   const [time, setTime] = useState<TimeData>(INITIAL_TIME);
   const [state, setState] = useState<TimerState>(INITIAL_TIMER_STATE);
 
-  function InitialValues() { return 125 * 1000; } // we need to convert this value * 1000 bc performance.now() use mileseconds
-
   useEffect(() => { //handle default values and future localStore values
-    const ts = InitialValues();
-    accumulatedRef.current = ts || 0;
-    setTime(parseSecondsToTime(ts || 0));
+    accumulatedRef.current = InitialValues();
+    setTime(parseSecondsToTime(InitialValues()));
   }, [])
 
   useEffect(() => {
-    if (!state.isRunning) {//clear the startRef and the interval for no memory leaks
-      clearTimerInterval();
+    if (!state.isRunning) {
+      cleanUpTimerRefs(); //clear the startRef and the interval for no memory leaks
       return;
     }
 
     startRef.current = performance.now();
     intervalRef.current = setInterval(() => {
       const now = performance.now();
-      const delta = now - (startRef?.current ?? 0) + accumulatedRef.current; // acumulatedRef works as default value
+      const deltaMs = now - (startRef?.current ?? 0);
+      const deltaSeconds = deltaMs / 1000;
+      const totalSeconds = deltaSeconds + accumulatedRef.current;
 
-      setTime(parseSecondsToTime(delta));
+      setTime(parseSecondsToTime(totalSeconds));
     }, 1000);
 
-    return () => clearTimerInterval();
+    return () => cleanUpTimerRefs();
   }, [state.isRunning]);
+
+  const cleanUpTimerRefs = () => {
+    clearTimerInterval();
+    startRef.current = null;
+  }
 
   const clearTimerInterval = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    startRef.current = null;
   };
 
   const updateStateInternal = (payload: Partial<TimerState>) => {
@@ -56,7 +61,7 @@ const TimerProvider = ({ children }: TimerProviderProps) => {
   };
 
   const cancelTimer = () => {
-    clearTimerInterval();
+    cleanUpTimerRefs();
     accumulatedRef.current = 0;
     setTime(INITIAL_TIME);
     updateStateInternal({ isRunning: false, isPaused: false });
@@ -64,7 +69,10 @@ const TimerProvider = ({ children }: TimerProviderProps) => {
 
   const pauseTimer = () => {
     if (state.isRunning) {
-      accumulatedRef.current += performance.now() - (startRef?.current ?? 0);
+      const now = performance.now();
+      const deltaMs = now - (startRef?.current ?? 0);
+      const deltaSeconds = deltaMs / 1000;
+      accumulatedRef.current += deltaSeconds;
       setTime(parseSecondsToTime(accumulatedRef.current));
       updateStateInternal({ isRunning: false, isPaused: true });
     }
@@ -72,14 +80,13 @@ const TimerProvider = ({ children }: TimerProviderProps) => {
 
   const startTimer = () => {
     if (!state.isRunning) {
-      updateStateInternal({ isRunning: true });
+      updateStateInternal({ isRunning: true, isPaused: false });
     }
   };
 
-  // TODO: clear timer data
   const cleanTimerState = () => {
     updateStateInternal(INITIAL_TIMER_STATE);
-    clearTimerInterval();
+    cleanUpTimerRefs();
     accumulatedRef.current = 0;
     setTime(INITIAL_TIME);
   };
